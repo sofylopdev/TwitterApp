@@ -1,4 +1,4 @@
-package com.sofydev.twitterapp;
+package com.sofydev.twitterapp.api;
 
 import com.sofydev.twitterapp.api.TimelineService;
 import com.twitter.sdk.android.core.Session;

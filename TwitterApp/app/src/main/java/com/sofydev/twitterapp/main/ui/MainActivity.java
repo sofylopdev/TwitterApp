@@ -13,7 +13,7 @@ import android.view.MenuItem;
 import com.sofydev.twitterapp.LoginActivity;
 import com.sofydev.twitterapp.R;
 import com.sofydev.twitterapp.hashtags.HashtagsFragment;
-import com.sofydev.twitterapp.images.ImagesFragment;
+import com.sofydev.twitterapp.images.ui.ImagesFragment;
 import com.sofydev.twitterapp.main.adapters.MainSectionsPagerAdapter;
 import com.twitter.sdk.android.Twitter;
 
