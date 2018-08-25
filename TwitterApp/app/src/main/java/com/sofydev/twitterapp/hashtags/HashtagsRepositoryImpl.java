@@ -1,13 +1,13 @@
-package com.sofydev.twitterapp.images;
+package com.sofydev.twitterapp.hashtags;
 
 import com.sofydev.twitterapp.api.CustomTwitterApiClient;
-import com.sofydev.twitterapp.entities.Image;
-import com.sofydev.twitterapp.images.events.ImagesEvent;
+import com.sofydev.twitterapp.entities.Hashtag;
+import com.sofydev.twitterapp.hashtags.events.HashtagsEvent;
 import com.sofydev.twitterapp.lib.base.EventBus;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterException;
-import com.twitter.sdk.android.core.models.MediaEntity;
+import com.twitter.sdk.android.core.models.HashtagEntity;
 import com.twitter.sdk.android.core.models.Tweet;
 
 import java.util.ArrayList;
@@ -15,47 +15,41 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class ImagesRepositoryImpl implements ImagesRepository {
-
+public class HashtagsRepositoryImpl implements HashtagsRepository {
     private EventBus eventBus;
     private CustomTwitterApiClient client;
     private static final int TWEET_COUNT = 100;
 
-    public ImagesRepositoryImpl(EventBus eventBus, CustomTwitterApiClient client) {
+    public HashtagsRepositoryImpl(EventBus eventBus, CustomTwitterApiClient client) {
         this.eventBus = eventBus;
         this.client = client;
     }
 
     @Override
-    public void getImages() {
+    public void getHashtags() {
         Callback<List<Tweet>> callback = new Callback<List<Tweet>>() {
             @Override
             public void success(Result<List<Tweet>> result) {
-                List<Image> items = new ArrayList<>();
+                List<Hashtag> items = new ArrayList<>();
                 for (Tweet tweet : result.data) {
-                    if (containsImages(tweet)) {
-                        Image tweetModel = new Image();
+                    if (containsHashtags(tweet)) {
+                        Hashtag tweetModel = new Hashtag();
+
                         tweetModel.setId(tweet.idStr);
                         tweetModel.setFavoriteCount(tweet.favoriteCount);
+                        tweetModel.setTweetText(tweet.text);
 
-                        String tweetText = tweet.text;
-                        int index = tweetText.indexOf("http");
-                        if (index > 0) {
-                            tweetText = tweetText.substring(0, index);
+                        List<String> hashtags = new ArrayList<>();
+                        for (HashtagEntity hashtag : tweet.entities.hashtags) {
+                            hashtags.add(hashtag.text);
                         }
-
-                        tweetModel.setTweetText(tweetText);
-
-                        MediaEntity currentPhoto = tweet.entities.media.get(0);
-                        String imageUrl = currentPhoto.mediaUrl;
-                        tweetModel.setImageURL(imageUrl);
-
+                        tweetModel.setHashtags(hashtags);
                         items.add(tweetModel);
                     }
                 }
-                Collections.sort(items, new Comparator<Image>() {
+                Collections.sort(items, new Comparator<Hashtag>() {
                     @Override
-                    public int compare(Image o1, Image o2) {
+                    public int compare(Hashtag o1, Hashtag o2) {
                         return o2.getFavoriteCount() - o1.getFavoriteCount();
                     }
                 });
@@ -71,20 +65,20 @@ public class ImagesRepositoryImpl implements ImagesRepository {
 
     }
 
-    private boolean containsImages(Tweet tweet) {
+    private boolean containsHashtags(Tweet tweet) {
         return tweet.entities != null &&
-                tweet.entities.media != null &&
-                !tweet.entities.media.isEmpty();
+                tweet.entities.hashtags != null &&
+                !tweet.entities.hashtags.isEmpty();
     }
 
-    private void post(List<Image> images, String error) {
-        ImagesEvent event = new ImagesEvent();
-        event.setImages(images);
+    private void post(List<Hashtag> hashtags, String error) {
+        HashtagsEvent event = new HashtagsEvent();
+        event.setHashtags(hashtags);
         event.setError(error);
     }
 
-    private void post(List<Image> images) {
-        post(images, null);
+    private void post(List<Hashtag> hashtags) {
+        post(hashtags, null);
     }
 
     private void post(String error) {
